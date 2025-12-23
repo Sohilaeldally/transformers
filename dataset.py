@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 
 class BilingualDataset(Dataset):
     def __init__(self,ds,tokenizer_src,tokenizer_tgt,src_lang,tgt_lang,seq_len):
-        super.__init__()
+        super().__init__()
 
         self.ds=ds
         self.toknizer_src=tokenizer_src

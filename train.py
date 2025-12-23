@@ -16,7 +16,7 @@ import warnings
 from pathlib import Path
 
 from model import build_transformer
-from config import get_config,get_weights_file_path,latest_weights_file_path
+from config import get_config,get_wieghts_file_path,latest_weights_file_path
 from dataset import BilingualDataset, causal_mask
 
 def greedy_decode():
@@ -27,11 +27,11 @@ def run_validation():
 
 def get_all_sentences(ds,lang):
     for item in ds:
-        yield ds['translation'][lang]
+        yield item['translation'][lang]
 
 def get_or_build_tokenizer(config,ds,lang):
     tokenizer_path= Path(config['tokenizer_file'].format(lang))
-    if not (tokenizer_path).Path.exit :
+    if not tokenizer_path.exists():
         tokenizer=Tokenizer(WordLevel(unk_token='[UNK]'))
         tokenizer.pre_tokenizer=Whitespace()
         trainer=WordLevelTrainer(special_tokens=['[UNK]','[PAD]','[SOS]','[EOS]'],min_frequency=2)
@@ -39,6 +39,8 @@ def get_or_build_tokenizer(config,ds,lang):
         tokenizer.save(str(tokenizer_path))
     else:
         tokenizer=Tokenizer.from_file(str(tokenizer_path))
+    return tokenizer
+
     
 def get_ds(config):
    # It only has the train split, so we divide it
@@ -53,8 +55,8 @@ def get_ds(config):
    val_ds_size=len(ds_raw) - train_ds_size
    train_ds_raw ,val_ds_raw= random_split(ds_raw,[train_ds_size,val_ds_size])
    
-   train_ds=BilingualDataset(train_ds_raw,tokenizer_src,tokenizer_tgt,config['src_lang'],config['tgt_lang'],config['seql_len'])
-   val_ds=BilingualDataset(val_ds_raw,tokenizer_src,tokenizer_tgt,config['src_lang'],config['tgt_lang'],config['seql_len'])
+   train_ds=BilingualDataset(train_ds_raw,tokenizer_src,tokenizer_tgt,config['lang_src'],config['lang_tgt'],config['seq_len'])
+   val_ds=BilingualDataset(val_ds_raw,tokenizer_src,tokenizer_tgt,config['lang_src'],config['lang_tgt'],config['seq_len'])
    
    max_len_src=0
    max_len_tgt=0
@@ -79,7 +81,7 @@ def get_model(config, vocab_src_len, vocab_tgt_len):
 
 def train_ds(config):
     # Choose device
-   device =torch.device("cudd" if torch.cuda.is_available() else "cpu")
+   device =torch.device("cuda" if torch.cuda.is_available() else "cpu")
    print("Using device: ", device)
    if device.type == "cuda":
     print("Device name: ",torch.cuda.get_device_name(0))
@@ -90,20 +92,19 @@ def train_ds(config):
    # Make sure the weights folder exists
    Path(f"{config['datasource']}_{config['model_folder']}").mkdir(parents=True,exist_ok=True)
 
-   model= get_model(config,tokenizer_src.get_vocab_size(),tokenizer_tgt.get_vocab_size())
+   train_loader, val_loader, tokenizer_src, tokenizer_tgt = get_ds(config)
+   model = get_model(config,tokenizer_src.get_vocab_size(),tokenizer_tgt.get_vocab_size())
 
-   train_loader,val_loader,tokenizer_src,tokenizer_tgt=get_ds(config)
-   
    # Tensorboard
    writer = SummaryWriter(config['experiment_name'])
 
-   optimizer=torch.optim.Adam(model.parameter(),lr=config['lr'],eps=10e-9)
+   optimizer=torch.optim.Adam(model.parameters(),lr=config['lr'],eps=10e-9)
 
    initial_epoch=0
    global_step=0
 
    preload=config['preload']
-   model_filename= latest_weights_file_path(config) if preload =='latest' else get_weights_file_path(config,preload) if preload else None
+   model_filename= latest_weights_file_path(config) if preload =='latest' else get_wieghts_file_path(config,preload) if preload else None
    if model_filename:
     print(f'preloading model {model_filename}')
     state= torch.load(model_filename)
@@ -117,14 +118,14 @@ def train_ds(config):
    loss_fn= nn.CrossEntropyLoss(ignore_index=tokenizer_tgt.token_to_id('[PAD]'),label_smoothing=.1).to(device)
 
    for epoch in range(initial_epoch,config['num_epochs']):
-      torch.cuda.empty_cahe()
+      torch.cuda.empty_cache()
       model.train()
       batch_iterator = tqdm(train_loader,desc=f"processing Epoch {epoch:02d}")
       for batch in batch_iterator:   
-        encoder_input=batch['enocder_input'].to(device) #(B,seq_len)
-        decoder_input=batch['deocder_input'].to(device) #(B,seq_len)
-        encoder_mask=batch['enocder_mask'].to(device) #(B,1,1,seq_len)
-        decoder_mask=batch['deocder_mask'].to(device) #(B,1,seq_len,seq_len)
+        encoder_input=batch['encoder_input'].to(device) #(B,seq_len)
+        decoder_input=batch['decoder_input'].to(device) #(B,seq_len)
+        encoder_mask=batch['encoder_mask'].to(device) #(B,1,1,seq_len)
+        decoder_mask=batch['decoder_mask'].to(device) #(B,1,seq_len,seq_len)
 
         encoder_output= model.encode(encoder_input,encoder_mask) # (B,seq_len,d_model)
         decoder_output= model.decode(encoder_output,encoder_mask,decoder_input,decoder_mask) # (b,seq_len,d_model)
@@ -132,11 +133,11 @@ def train_ds(config):
 
         label=batch['label'].to(device) # (B,seq_len)
         
-        loss=loss_fn(proj_output.view(-1,tokenizer_tgt.vocab_size(),label.view(-1)))
+        loss=loss_fn(proj_output.view(-1,tokenizer_tgt.vocab_size()),label.view(-1))
         batch_iterator.set_postfix({"loss":f"{loss.item():6.3f}"})        
 
         # Log the loss
-        writer.add_scaler('train_loss',loss.item(),global_step)
+        writer.add_scalar('train_loss',loss.item(),global_step)
         writer.flush()
         optimizer.zero_grad(set_on_none=None)
 
@@ -145,7 +146,7 @@ def train_ds(config):
         # Update the weights
         optimizer.step()
 
-        globa_step +=1
+        global_step +=1
 
 if __name__ == "__main__":
     warnings.filterwarnings('ignore')
