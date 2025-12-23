@@ -129,17 +129,17 @@ def train_ds(config):
 
         encoder_output= model.encode(encoder_input,encoder_mask) # (B,seq_len,d_model)
         decoder_output= model.decode(encoder_output,encoder_mask,decoder_input,decoder_mask) # (b,seq_len,d_model)
-        proj_output=model.proj(decoder_output) # (B,seq_len,vocab_size)
+        proj_output=model.project(decoder_output) # (B,seq_len,vocab_size)
 
         label=batch['label'].to(device) # (B,seq_len)
         
-        loss=loss_fn(proj_output.view(-1,tokenizer_tgt.vocab_size()),label.view(-1))
+        loss=loss_fn(proj_output.view(-1,tokenizer_tgt.get_vocab_size()),label.view(-1))
         batch_iterator.set_postfix({"loss":f"{loss.item():6.3f}"})        
 
         # Log the loss
         writer.add_scalar('train_loss',loss.item(),global_step)
         writer.flush()
-        optimizer.zero_grad(set_on_none=None)
+        optimizer.zero_grad(set_to_none=None)
 
         # Backpropagate the loss
         loss.backward()
