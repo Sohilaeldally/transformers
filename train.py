@@ -62,8 +62,8 @@ def get_ds(config):
    max_len_tgt=0
 
    for item in ds_raw:
-       src_ids=tokenizer_src.encode(item['translation']['src_lang']).ids
-       tgt_ids=tokenizer_tgt.encode(item['translation']['src_lang']).ids
+       src_ids = tokenizer_src.encode(item['translation'][config['lang_src']]).ids
+       tgt_ids = tokenizer_src.encode(item['translation'][config['lang_src']]).ids
        max_len_src=max(max_len_src,len(src_ids))
        max_len_tgt=max(max_len_src,len(tgt_ids))
 
