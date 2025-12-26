@@ -4,4 +4,7 @@ __pycache__
 runs/
 weights/
 
+# Virtual environment
 venv/
+.venv/
+env/
