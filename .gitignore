@@ -1,29 +1,6 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
+__pycache__
+*.pt
+*.json
+runs/
+weights/
 
-# Environment
-venv/
-env/
-*.env
-
-# IDE / Editor
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
-
-# Python packages
-*.egg
-*.egg-info/
-dist/
-build/
