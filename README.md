@@ -14,7 +14,7 @@ tokenizer_es.json
 
 ## 🧠 Model Architecture
 
-* Transformer is implemented **entirely from scratch**, including:
+Transformer is implemented **entirely from scratch**, including:
 
 - Input Embeddings with scaling
 - Sinusoidal Positional Encoding
@@ -25,20 +25,19 @@ tokenizer_es.json
 - Layer Normalization
 - Masked Self-Attention in the Decoder
 
-**Model Configuration**
+### Model Configuration 
 - Encoder layers: 6
 - Decoder layers: 6
 - Attention heads: 8
 - Embedding size (d_model): 512
 - Feed-forward size: 2048
 
-
 ## 🚀 Training
 
 ```bash
 python train.py
 ```
-**Training details**
+#### Training details
 - Batch size: 8
 - Epochs: 20
 - Optimizer: Adam
