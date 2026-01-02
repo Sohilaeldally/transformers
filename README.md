@@ -1,5 +1,16 @@
 # transformers
 
+## 📝 Dataset
+
+- **Dataset**: OPUS Books
+- **Source Language**: English (`en`)
+- **Target Language**: Spanish (`es`)
+- Loaded via Hugging Face `datasets`
+
+The dataset is split into:
+- **90% Training**
+- **10% Validation**
+
 ## 🔤 Tokenization
 
 - Word-level tokenization using Hugging Face tokenizers
@@ -37,7 +48,7 @@ Transformer is implemented **entirely from scratch**, including:
 ```bash
 python train.py
 ```
-#### Training details
+### Training details
 - Batch size: 8
 - Epochs: 20
 - Optimizer: Adam
