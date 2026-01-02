@@ -1,4 +1,38 @@
 # transformers
+
+## 🔤 Tokenization
+
+- Word-level tokenization using Hugging Face tokenizers
+- Separate tokenizers for source and target languages
+- Special tokens:`[PAD]`,`[UNK]`,`[SOS]`,`[EOS]`
+
+Tokenizers are saved as:
+```text
+tokenizer_en.json
+tokenizer_es.json
+```
+
+## 🧠 Model Architecture
+
+* Transformer is implemented **entirely from scratch**, including:
+
+- Input Embeddings with scaling
+- Sinusoidal Positional Encoding
+- Multi-Head Self-Attention
+- Encoder–Decoder (Cross) Attention
+- Feed Forward Networks
+- Residual Connections
+- Layer Normalization
+- Masked Self-Attention in the Decoder
+
+**Model Configuration**
+- Encoder layers: 6
+- Decoder layers: 6
+- Attention heads: 8
+- Embedding size (d_model): 512
+- Feed-forward size: 2048
+
+
 ## 🚀 Training
 
 ```bash
