@@ -1,4 +1,17 @@
 # transformers
+## 🚀 Training
+
+```bash
+python train.py
+```
+**Training details**
+- Batch size: 8
+- Epochs: 20
+- Optimizer: Adam
+- Learning rate: 1e-4
+- Loss: CrossEntropyLoss with label smoothing (0.1)
+- Maximum sequence length: 350
+- Model checkpoints saved after every epoch
 
 ## 🔍 Validation & Decoding
 - Validation is performed after each epoch
