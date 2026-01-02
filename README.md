@@ -1,8 +1,7 @@
 
 ## 🌍 Transformer Architecture from Scratch (English → Spanish NMT)
 A from-scratch implementation of the Transformer model in PyTorch, 
-trained on the OPUS Books dataset 
-for English → Spanish neural machine translation, based on **Attention Is All You Need (Vaswani et al., 2017)**.
+trained on the **OPUS Books dataset for English → Spanish neural machine translation**, based on **Attention Is All You Need (Vaswani et al., 2017)**.
 
 ## ⚙️ Installation
 ### 1. Clone the repository
